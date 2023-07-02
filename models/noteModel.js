@@ -52,6 +52,11 @@ const noteSchema = mongoose.Schema({
     author: {
         type: mongoose.Types.ObjectId,
         ref: "User"
+    },
+
+    file: {
+        type: String,
+        required: [true, "Can't upload a note without a file"]
     }
 
 
