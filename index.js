@@ -5,6 +5,7 @@ const branchRoutes = require('./routes/branchRoutes');
 const subRoutes = require('./routes/subRoutes');
 const modRoutes =  require('./routes/modRoutes');
 const userRoutes = require('./routes/userRoutes');
+const noteRoutes = require('./routes/noteRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -21,10 +22,12 @@ const start = async () => {
         console.log(err);
     }
 };
+
 app.use('/api/v1/branch', branchRoutes);
 app.use('/api/v1/sub', subRoutes);
 app.use('/api/v1/mod', modRoutes);
 app.use('/api/v1/users',userRoutes);
+app.use('/api/v1/notes',noteRoutes);
 app.use(errorHandler);
 start();
 
