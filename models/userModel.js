@@ -21,7 +21,8 @@ const userSchema = mongoose.Schema({
     }],
 
     coins: {
-        type: Number
+        type: Number,
+        default: 0
     }
 },
     { timestamps: true }
