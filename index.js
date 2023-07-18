@@ -5,6 +5,7 @@ const branchRoutes = require('./routes/branchRoutes');
 const subRoutes = require('./routes/subRoutes');
 const modRoutes = require('./routes/modRoutes');
 const userRoutes = require('./routes/userRoutes');
+const bodyParser = require('body-parser');
 const noteRoutes = require('./routes/noteRoutes');
 const cors = require('cors');
 require('dotenv').config();
@@ -13,9 +14,10 @@ require('dotenv').config();
 
 const app = express();
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8000;
 app.use(express.json());
 app.use(cors())
+app.use(bodyParser.json())
 const start = async () => {
     try {
         await connectDB(process.env.MONGO_URI);

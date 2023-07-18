@@ -20,26 +20,26 @@ const noteSchema = mongoose.Schema({
         default: false
     },
 
-    subject:{
+    subject: {
         type: mongoose.Types.ObjectId,
-        ref : "Subject",
-        required: [true, "Subject must be provided"]
+        ref: "Subject",
+        required: [false, "Subject must be provided"]
     },
 
-    module:{
+    module: {
         type: mongoose.Types.ObjectId,
         ref: "Module",
-        required: [true, "Module must be provided"]
+        required: [false, "Module must be provided"]
     },
 
     purchased: [{
-        type : mongoose.Types.ObjectId,
-        ref : "User" 
+        type: mongoose.Types.ObjectId,
+        ref: "User"
     }],
 
     likes: [{
-        type : mongoose.Types.ObjectId,
-        ref : "User" 
+        type: mongoose.Types.ObjectId,
+        ref: "User"
     }],
 
     desc: {
@@ -63,4 +63,4 @@ const noteSchema = mongoose.Schema({
 });
 
 const Note = mongoose.model("Note", noteSchema);
-module.exports = {Note, noteSchema}
+module.exports = { Note, noteSchema }

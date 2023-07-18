@@ -22,10 +22,18 @@ const userSchema = mongoose.Schema({
 
     coins: {
         type: Number,
-        default: 0
-    }
+        default: 100
+    },
+    isVerified:
+    {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: {
+        type: String
+    },
 },
     { timestamps: true }
 );
 const User = mongoose.model("User", userSchema);
-module.exports = {User, userSchema}
+module.exports = { User, userSchema }
