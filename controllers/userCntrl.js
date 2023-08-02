@@ -14,6 +14,63 @@ const userInfo = asyncHandler(async (req, res) => {
 });
 
 
+const transferCoins = asyncHandler(async (req, res) => {
+    const { receiverID } = req.params;
+    try {
+        const { coins } = req.body;
+        const senderUserID = req.user.id;
+
+        console.log(receiverID)
+        //check the reciver user
+        if (!receiverID) {
+            return res.status(400).json({ message: "Receiver ID is required" });
+        }
+        //check the sender user
+        const senderUser = await User.findById(senderUserID);
+        console.log(senderUser)
+        if (!senderUser) {
+            return res.status(400).json({ mssg: "Sender user does not exist" });
+        }
+
+        const receiverUser = await User.findById(receiverID);
+        console.log(receiverID)
+        //check if the reciver user exists
+        if (!receiverUser) {
+            return res.status(400).json({ mssg: "Receiver user does not exist" });
+        }
+
+        //check if the coins is passed
+        if (!coins || typeof coins !== "number") {
+            return res.status(400).json({ message: "Coins should be a valid number" });
+        }
+
+
+        // Check if the sender has enough coins
+        if (senderUser.coins < coins) {
+            return res.status(400).json({ message: "User does not have enough coins" });
+        } else if (senderUser.coins < 50) {
+            // Limit is 50 to transfer the coins
+            return res.status(400).json({ message: "Your coins should be greater than 50" });
+        } else {
+            // Transfer coins
+            senderUser.coins -= coins;
+            receiverUser.coins += coins;
+            await senderUser.save();
+            await receiverUser.save();
+            return res.status(200).json({
+                message: "Coins transferred successfully",
+                senderUser: senderUser,
+                receiverUser: receiverUser,
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: "An error occurred during the coins transfer." });
+    }
+});
+
+
+
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -43,7 +100,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
         await sendVerificationEmail(email, verificationToken);
 
-        res.json({ message: 'Registration successful. Please check your email for verification.', verificationToken: verificationToken });
+        res.json({ message: 'Registration successful. Please check your email for verification.', verificationToken: verificationToken, user: user });
 
     } catch (error) {
         res.status(500).json({ error: 'An error occurred during registration.' });
@@ -114,7 +171,7 @@ const loginUser = asyncHandler(async (req, res) => {
                 id: user.id
             }
         }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
-        res.status(200).json({ token: accessToken, msg: "User logged in" });
+        res.status(200).json({ token: accessToken, msg: "User logged in", user: user });
     } else {
         res.status(400);
         throw new Error("Password is not valid");
@@ -198,7 +255,8 @@ module.exports = {
     loginUser,
     verifyemail,
     sendResetPasswordEmail,
-    resetPassword
+    resetPassword,
+    transferCoins
 
 
 } 
