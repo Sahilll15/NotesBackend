@@ -75,7 +75,7 @@ const transferCoins = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
 
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, role } = req.body;
 
         if (!username || !email || !password) {
             res.status(400);
@@ -94,6 +94,7 @@ const registerUser = asyncHandler(async (req, res) => {
         const user = await User.create({
             username,
             email,
+            role,
             password: hashedPassword,
             verificationToken
         });
@@ -103,7 +104,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.json({ message: 'Registration successful. Please check your email for verification.', verificationToken: verificationToken, user: user });
 
     } catch (error) {
-        res.status(500).json({ error: 'An error occurred during registration.' });
+        res.status(500).json({ error: error.message });
         console.log(error);
 
     }
@@ -142,7 +143,7 @@ const verifyemail = async (req, res) => {
     }
 };
 
-
+//login user
 const loginUser = asyncHandler(async (req, res) => {
     console.log(process.env.ACCESS_TOKEN_SECRET)
     const { email, password } = req.body;
@@ -157,19 +158,25 @@ const loginUser = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error(`User with this ${email} does not exist`);
     }
-
+    const verificationToken = generateverificationToken(email);
     if (!user.isVerified) {
         res.status(403);
-        throw new Error("Email not verified. Please verify your email before logging in.");
+        user.verificationToken = verificationToken;
+        await user.save();
+        sendVerificationEmail(email, verificationToken);
+        res.status(400).json({ mssg: "A new email has been sent to your email plz verify!!" })
+
     }
 
     if (user && await bcrypt.compare(password, user.password)) {
         const accessToken = jwt.sign({
-            user: {
-                username: user.username,
-                email: user.email,
-                id: user.id
-            }
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            coins: user.coins,
+            isVerified: user.isVerified,
+
         }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
         res.status(200).json({ token: accessToken, msg: "User logged in", user: user });
     } else {
@@ -247,6 +254,10 @@ const resetPassword = async (req, res) => {
         console.log(error);
     }
 }
+
+
+
+
 
 
 module.exports = {
