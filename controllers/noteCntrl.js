@@ -50,12 +50,17 @@ const addNotes = asyncHandler(async (req, res) => {
 const deleteNote = asyncHandler(async (req, res) => {
     try {
         const { id: noteId } = req.params;
+        const user = req.user;
+        if (user.role !== "superuser") {
+            res.status(403).json({ message: "You are not authorized to access this route" });
+            return;
+        }
         const note = await Note.findById(noteId).populate("author");
         if (!note) {
             res.status(404).json({ message: `Unable to find note with id ${noteId}` });
             return;
         }
-        note.author.notesUploaded.pull(note);
+        note.author.notesUploaded.pull(noteId);
         await note.author.save();
 
         fs.unlink(path.join(__dirname, '..', note.file), (err) => {
