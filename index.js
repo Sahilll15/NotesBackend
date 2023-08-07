@@ -7,6 +7,7 @@ const modRoutes = require('./routes/modRoutes');
 const userRoutes = require('./routes/userRoutes');
 const bodyParser = require('body-parser');
 const noteRoutes = require('./routes/noteRoutes');
+const todoRoutes = require('./routes/todoRoutes');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -39,6 +40,7 @@ app.use('/api/v1/sub', subRoutes);
 app.use('/api/v1/mod', modRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/notes', noteRoutes);
+app.use('/api/v1/todos', todoRoutes);
 app.use(errorHandler);
 start();
 

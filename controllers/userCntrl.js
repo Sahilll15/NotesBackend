@@ -93,9 +93,7 @@ const registerUser = asyncHandler(async (req, res) => {
             res.status(400);
             throw new Error(`User with ${email} already exist`);
         }
-        console.log("hi")
         const verificationToken = generateverificationToken(email);
-        console.log("hello")
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             username,
@@ -104,6 +102,7 @@ const registerUser = asyncHandler(async (req, res) => {
             password: hashedPassword,
             verificationToken
         });
+
 
         await sendVerificationEmail(email, verificationToken);
 
@@ -152,9 +151,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
         const user = await User.findOne({ email });
 
-        if (!user.is_active) {
-            return res.status(400).json({ mssg: "User is not active" });
-        }
 
         if (!user) {
             res.status(404);
@@ -178,6 +174,7 @@ const loginUser = asyncHandler(async (req, res) => {
                 role: user.role,
                 coins: user.coins,
                 isVerified: user.isVerified,
+                todos: user.todos
 
             }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
             res.status(200).json({ token: accessToken, msg: "User logged in", user: user });
