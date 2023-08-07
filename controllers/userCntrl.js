@@ -7,6 +7,8 @@ const { sendVerificationEmail, generateverificationToken, generateOTP } = requir
 const { resetPasswordEmail } = require('../utils/resetpasswordemail')
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
+const isEmailEdu = require('../utils/isEduEmail')
+const { successFullVerification } = require('../utils/EmailTemplates')
 require('dotenv').config();
 
 const userInfo = asyncHandler(async (req, res) => {
@@ -75,7 +77,11 @@ const transferCoins = asyncHandler(async (req, res) => {
 const registerUser = asyncHandler(async (req, res) => {
 
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, role } = req.body;
+        if (role !== "superuser" && !isEmailEdu(email)) {
+            res.status(400).json({ "mssg": "Only vect emails are allowed" })
+            return;
+        }
 
         if (!username || !email || !password) {
             res.status(400);
@@ -94,6 +100,7 @@ const registerUser = asyncHandler(async (req, res) => {
         const user = await User.create({
             username,
             email,
+            role,
             password: hashedPassword,
             verificationToken
         });
@@ -103,7 +110,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.json({ message: 'Registration successful. Please check your email for verification.', verificationToken: verificationToken, user: user });
 
     } catch (error) {
-        res.status(500).json({ error: 'An error occurred during registration.' });
+        res.status(500).json({ error: error.message });
         console.log(error);
 
     }
@@ -122,17 +129,7 @@ const verifyemail = async (req, res) => {
         user.verificationToken = null;
         await user.save();
 
-        const congratulationContent = `
-      <h1 style="color: #008080; font-family: 'Arial', sans-serif; text-align: center;">Congratulations!</h1>
-      <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px;">
-        <p style="font-size: 16px; font-family: 'Arial', sans-serif; color: #444; text-align: center;">You have successfully verified your email.</p>
-        <div style="text-align: center; margin-top: 20px;">
-          <a href="http://localhost:3000/login" style="display: inline-block; background-color: #008080; color: #fff; font-size: 18px; font-family: 'Arial', sans-serif; text-decoration: none; padding: 10px 20px; border-radius: 5px; border: 2px solid #008080; transition: background-color 0.3s ease-in-out;">
-            Go to Home Page
-          </a>
-        </div>
-      </div>
-    `;
+        const congratulationContent = successFullVerification();
 
         res.send(congratulationContent);
 
@@ -142,39 +139,55 @@ const verifyemail = async (req, res) => {
     }
 };
 
-
+//login user
 const loginUser = asyncHandler(async (req, res) => {
-    console.log(process.env.ACCESS_TOKEN_SECRET)
-    const { email, password } = req.body;
-    if (!email || !password) {
-        res.status(400);
-        throw new Error("All fields are mandatory");
-    }
 
-    const user = await User.findOne({ email });
+    try {
 
-    if (!user) {
-        res.status(404);
-        throw new Error(`User with this ${email} does not exist`);
-    }
+        const { email, password } = req.body;
+        if (!email || !password) {
+            res.status(400);
+            throw new Error("All fields are mandatory");
+        }
 
-    if (!user.isVerified) {
-        res.status(403);
-        throw new Error("Email not verified. Please verify your email before logging in.");
-    }
+        const user = await User.findOne({ email });
 
-    if (user && await bcrypt.compare(password, user.password)) {
-        const accessToken = jwt.sign({
-            user: {
+        if (!user.is_active) {
+            return res.status(400).json({ mssg: "User is not active" });
+        }
+
+        if (!user) {
+            res.status(404);
+            throw new Error(`User with this ${email} does not exist`);
+        }
+        const verificationToken = generateverificationToken(email);
+        if (!user.isVerified) {
+            res.status(403);
+            user.verificationToken = verificationToken;
+            await user.save();
+            sendVerificationEmail(email, verificationToken);
+            res.status(400).json({ mssg: "A new email has been sent to your email plz verify!!" })
+
+        }
+
+        if (user && await bcrypt.compare(password, user.password)) {
+            const accessToken = jwt.sign({
+                id: user._id,
                 username: user.username,
                 email: user.email,
-                id: user.id
-            }
-        }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
-        res.status(200).json({ token: accessToken, msg: "User logged in", user: user });
-    } else {
-        res.status(400);
-        throw new Error("Password is not valid");
+                role: user.role,
+                coins: user.coins,
+                isVerified: user.isVerified,
+
+            }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+            res.status(200).json({ token: accessToken, msg: "User logged in", user: user });
+        } else {
+            res.status(400);
+            throw new Error("Password is not valid");
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+        console.log(error);
     }
 });
 
@@ -247,6 +260,10 @@ const resetPassword = async (req, res) => {
         console.log(error);
     }
 }
+
+
+
+
 
 
 module.exports = {

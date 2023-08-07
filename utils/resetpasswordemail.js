@@ -1,5 +1,6 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
+const { OtpContent } = require('../utils/EmailTemplates')
 
 const resetPasswordEmail = async (receipentEmail, otpcode) => {
 
@@ -11,16 +12,7 @@ const resetPasswordEmail = async (receipentEmail, otpcode) => {
         }
     });
 
-    const emailcontent = `
-    <h1 style="color: #008080; font-family: 'Arial', sans-serif; text-align: center;">NotesBeta</h1>
-    <h1 style="color: #008080; font-family: 'Arial', sans-serif; text-align: center;">Reset Password</h1>
-    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px;">
-        <p style="font-size: 16px; font-family: 'Arial', sans-serif; color: #444; text-align: center;">Your OTP for resetting password is:</p>
-        <div style="text-align: center; margin-top: 20px;">
-            <h1>${otpcode}</h1>
-        </div>
-    </div>
-    `;
+    const emailcontent = OtpContent(otpcode);
     await transporter.sendMail({
         from: process.env.EMAIL,
         to: receipentEmail,

@@ -24,6 +24,15 @@ const userSchema = mongoose.Schema({
         type: Number,
         default: 100
     },
+    role: {
+        type: String,
+        enum: ['user', 'superuser'],
+        default: 'user'
+    },
+    is_active: {
+        type: Boolean,
+        default: 'true'
+    },
     isVerified:
     {
         type: Boolean,
