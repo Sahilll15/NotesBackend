@@ -31,9 +31,14 @@ const start = async () => {
     }
 };
 
+//use ejs to send the res on get request
+app.set('view engine', 'ejs');
+
+
 app.get('/', (req, res) => {
-    res.send("hello")
+    res.render('index');
 })
+
 
 app.use('/api/v1/branch', branchRoutes);
 app.use('/api/v1/sub', subRoutes);
