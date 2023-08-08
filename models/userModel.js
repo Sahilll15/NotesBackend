@@ -48,6 +48,9 @@ const userSchema = mongoose.Schema(
         verificationToken: {
             type: String,
         },
+        lastPlayedLottery: {
+            type: Date
+        }
     },
     { timestamps: true }
 );

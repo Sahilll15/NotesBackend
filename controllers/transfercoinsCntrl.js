@@ -107,9 +107,35 @@ const getTransferCoinsHistoryByUser = asyncHandler(async (req, res) => {
     }
 });
 
+const lottery = asyncHandler(async (req, res) => {
+
+    try {
+        const randomNumber = Math.floor(Math.random() * 30);
+        const coinsWon = randomNumber;
+
+        const userID = req.user.id;
+
+        const user = await User.findById(userID);
+        if (user) {
+            user.coins += coinsWon;
+            await user.save();
+            if (coinsWon === 0) {
+                res.status(200).json({ message: `You won ${coinsWon} coins , sorry this was an fantasy from @karangandh`, user: user })
+            }
+            return res.status(200).json({ message: `You won ${coinsWon} coins in the lottery!`, user: user });
+        } else {
+            return res.status(400).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'An error occurred during the lottery.' });
+    }
+})
+
 
 module.exports = {
     transferCoins,
     getTransferCoinsHistory,
-    getTransferCoinsHistoryByUser
+    getTransferCoinsHistoryByUser,
+    lottery
 };
