@@ -27,7 +27,7 @@ const sendVerificationEmail = async (recipientEmail, verificationToken) => {
         console.log(process.env.EMAIL + "email this is")
 
         await transporter.sendMail({
-            from: 'sahilchalke1011@gmail.com',
+            from: process.env.EMAIL,
             to: recipientEmail,
             subject: 'Email Verification',
             html: emailcontent
