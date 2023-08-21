@@ -2,7 +2,20 @@ const asyncHandler = require('express-async-handler');
 const { Note } = require('../models/noteModel');
 const { User } = require('../models/userModel');
 const fs = require('fs');
-const path = require('path');
+const path = require('path')
+const AWS = require('aws-sdk')
+require('dotenv').config();
+
+// aws confioguration
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: 'us-east-2'
+})
+
+const s3 = new AWS.S3();
+
+
 
 const getAllNotes = asyncHandler(async (req, res) => {
     try {
@@ -18,10 +31,22 @@ const addNotes = asyncHandler(async (req, res) => {
     try {
         const { name, subject, module, desc } = req.body;
 
-        if (!name || !subject || !module || !desc || !req.file) {
-            res.status(400).json({ message: "All fields are mandatory" });
-            return;
-        }
+        console.log(req.file)
+
+        // const params = {
+        //     Bucket: process.env.AWS_BUCKET_NAME,
+        //     Key: `${name}-${req.file.originalname}`,
+        //     Body: req.file.buffer,
+        //     ContentType: req.file.mimetype,
+        // }
+
+        // let s3Response;
+        // try {
+        //     s3Response = await s3.upload(params).promise();
+        // } catch (s3Error) {
+        //     console.error("Error uploading file to S3:", s3Error);
+        //     return res.status(500).json({ msg: "Error uploading file to S3" });
+        // }
 
         const newNote = await Note.create({
             name,
@@ -29,7 +54,8 @@ const addNotes = asyncHandler(async (req, res) => {
             module,
             desc,
             author: req.user.id,
-            file: req.file.path
+            file: req.file.path,
+            fileMimeType: req.file.mimetype,
         });
 
         const user = await User.findById(req.user.id);
@@ -46,6 +72,60 @@ const addNotes = asyncHandler(async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
+const AcceptRejectNotes = async (req, res) => {
+    const { NoteId } = req.params;
+    try {
+        const user = req.user;
+        if (user.role !== "superuser") {
+            res.status(403).json({ message: "You are not authorized to access this route" });
+            return;
+        }
+        const note = await Note.findById(NoteId);
+        if (!note) {
+            res.status(404).json({ message: `No note found with id ${NoteId}` });
+            return;
+        }
+        if (note.acceptedStatus === false) {
+            note.acceptedStatus = true;
+
+            const fileKey = `${note.name}-${note.file}`;
+            const filePath = note.file;
+
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: fileKey,
+                Body: fs.createReadStream(filePath),
+                ContentType: note.fileMimeType,
+            }
+
+            try {
+                const s3Response = await s3.upload(params).promise();
+                console.log("File uploaded to S3:", s3Response.Location);
+
+
+                note.file = s3Response.Location;
+
+                await note.save();
+                fs.unlinkSync(filePath);
+
+                res.status(200).json({ message: "Note accepted successfully", note: note });
+            } catch (s3Error) {
+                console.error("Error uploading file to S3:", s3Error);
+                return res.status(500).json({ msg: "Error uploading file to S3" });
+            }
+        } else {
+            note.acceptedStatus = false;
+            await note.save();
+            res.status(200).json({ message: "Note rejected successfully", note: note });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 
 const deleteNote = asyncHandler(async (req, res) => {
     try {
@@ -113,35 +193,6 @@ const getNotesAdmin = async (req, res) => {
 };
 
 
-const AcceptRejectNotes = async (req, res) => {
-    const { NoteId } = req.params;
-    try {
-        const user = req.user;
-        if (user.role !== "superuser") {
-            res.status(403).json({ message: "You are not authorized to access this route" });
-            return;
-        }
-        const note = await Note.findById(NoteId);
-        if (!note) {
-            res.status(404).json({ message: `No note found with id ${NoteId}` });
-            return;
-        }
-        if (note.acceptedStatus === false) {
-            note.acceptedStatus = true;
-            await note.save();
-            res.status(200).json({ message: "Note accepted successfully", note: note });
-        } else {
-            note.acceptedStatus = false;
-            await note.save();
-            res.status(200).json({ message: "Note rejected successfully", note: note });
-        }
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
-
-    }
-}
 
 
 

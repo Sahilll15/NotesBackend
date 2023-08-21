@@ -25,7 +25,6 @@ const addSubjects = asyncHandler(async (req, res) => {
         sem,
         teacher
     });
-
     await branchModel.subjects.push(branchModel);
     branchModel.save();
 
