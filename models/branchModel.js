@@ -6,7 +6,7 @@ const branchSchema = mongoose.Schema({
         required: [true, "Branch name must be provided"]
     },
     year: {
-        type: String,
+        type: Number,
         required: [true, "Branch year must be provided"]
     },
     subjects: [
@@ -18,4 +18,4 @@ const branchSchema = mongoose.Schema({
 });
 
 const Branch = mongoose.model("Branch", branchSchema);
-module.exports = {Branch, branchSchema};
+module.exports = { Branch, branchSchema };

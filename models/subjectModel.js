@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const subjectSchema = mongoose.Schema({
     name: {
         type: String,
-        required: [true, "subject name must be provided"]
+        required: [true, "subject name must be provided"],
+        unique: true
     },
     branch: {
         type: mongoose.Types.ObjectId,

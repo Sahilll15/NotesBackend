@@ -1,8 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const { ModuleName } = require('../models/moduleModel');
 const { Subject } = require('../models/subjectModel');
-const getAllModules = asyncHandler(async (req, res) => {
 
+const getAllModules = asyncHandler(async (req, res) => {
     const mods = await ModuleName.find().populate('subject');
     res.status(200).json(mods);
 });

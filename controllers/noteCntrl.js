@@ -33,20 +33,6 @@ const addNotes = asyncHandler(async (req, res) => {
 
         console.log(req.file)
 
-        // const params = {
-        //     Bucket: process.env.AWS_BUCKET_NAME,
-        //     Key: `${name}-${req.file.originalname}`,
-        //     Body: req.file.buffer,
-        //     ContentType: req.file.mimetype,
-        // }
-
-        // let s3Response;
-        // try {
-        //     s3Response = await s3.upload(params).promise();
-        // } catch (s3Error) {
-        //     console.error("Error uploading file to S3:", s3Error);
-        //     return res.status(500).json({ msg: "Error uploading file to S3" });
-        // }
 
         const newNote = await Note.create({
             name,
