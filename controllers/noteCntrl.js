@@ -1,6 +1,10 @@
 const asyncHandler = require('express-async-handler');
 const { Note } = require('../models/noteModel');
 const { User } = require('../models/userModel');
+const { Branch } = require('../models/branchModel')
+const { Subject } = require('../models/subjectModel')
+const { ModuleName } = require('../models/moduleModel')
+
 const fs = require('fs');
 const path = require('path')
 const AWS = require('aws-sdk')
@@ -36,12 +40,12 @@ const addNotes = asyncHandler(async (req, res) => {
 
         const newNote = await Note.create({
             name,
-            subject,
-            module,
+            // subject,
+            // module,
             desc,
             author: req.user.id,
             file: req.file.path,
-            fileMimeType: req.file.mimetype,
+            fileMimeType: req.file.type,
         });
 
         const user = await User.findById(req.user.id);
@@ -179,7 +183,22 @@ const getNotesAdmin = async (req, res) => {
 };
 
 
+const getFormData = async (req, res) => {
+    try {
+        const getModules = await ModuleName.find();
+        const getSubjects = await Subject.find();
+        const getBranches = await Branch.find();
+
+        res.status(200).json({ message: "Data fetched successfully", data: { module: getModules, branches: getBranches, subject: getSubjects } });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+
+}
 
 
 
-module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes };
+
+module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData };

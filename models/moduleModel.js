@@ -12,5 +12,5 @@ const moduleSchema = mongoose.Schema({
     },
 });
 
-const ModuleName = mongoose.model("ModuleName",moduleSchema);
-module.exports = {ModuleName, moduleSchema}
+const ModuleName = mongoose.model("ModuleName", moduleSchema);
+module.exports = { ModuleName, moduleSchema }

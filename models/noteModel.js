@@ -37,9 +37,9 @@ const noteSchema = mongoose.Schema({
     }],
     desc: {
         type: String,
-        minLength: 10,
-        maxLength: 250,
-        required: [true, "Desc must be provided"]
+        // minLength: 10,
+        // maxLength: 250,
+        // required: [true, "Desc must be provided"]
     },
     author: {
         type: mongoose.Types.ObjectId,
@@ -51,7 +51,7 @@ const noteSchema = mongoose.Schema({
     },
     fileMimeType: {
         type: String,
-        required: [true, "Can't upload a note without a file"]
+        // required: [true, "Can't upload a note without a file"]
     }
 });
 
