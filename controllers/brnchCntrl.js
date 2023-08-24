@@ -8,7 +8,7 @@ const getAllBrnch = asyncHandler(async (req, res) => {
 
 const addBranch = asyncHandler(async (req, res) => {
     const { name, year } = req.body;
-    
+
     if (!name || !year) {
         res.status(403);
         throw new Error("All fields are mandatory");
@@ -20,6 +20,7 @@ const addBranch = asyncHandler(async (req, res) => {
     });
 
     res.status(201).json(branch);
+
 });
 
 
