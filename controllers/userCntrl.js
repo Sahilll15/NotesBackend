@@ -16,8 +16,6 @@ const userInfo = asyncHandler(async (req, res) => {
 });
 
 
-
-
 const registerUser = asyncHandler(async (req, res) => {
 
     try {
