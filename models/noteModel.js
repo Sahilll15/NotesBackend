@@ -18,13 +18,11 @@ const noteSchema = mongoose.Schema({
         default: false
     },
     subject: {
-        type: mongoose.Types.ObjectId,
-        ref: "Subject",
+        type: String,
         required: [false, "Subject must be provided"]
     },
     module: {
-        type: mongoose.Types.ObjectId,
-        ref: "Module",
+        type: Number,
         required: [false, "Module must be provided"]
     },
     purchased: [{

@@ -35,13 +35,21 @@ const addNotes = asyncHandler(async (req, res) => {
     try {
         const { name, subject, module, desc } = req.body;
 
-        console.log(req.file)
+        //add validation
+        if (!name || !subject || !module || !desc) {
+            return res.status(400).json({ message: "Please enter all the fields" })
+        }
 
+        console.log(req.file)
+        if (req.body === null) {
+            res.status(400).json({ message: "Please upload a file" });
+            return;
+        }
 
         const newNote = await Note.create({
             name,
-            // subject,
-            // module,
+            subject,
+            module,
             desc,
             author: req.user.id,
             file: req.file.path,
