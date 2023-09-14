@@ -9,7 +9,4 @@ router.get('/getTransferCoinsByUser/:userID', validateToken, getTransferCoinsHis
 router.post('/lottery', validateToken, lottery)
 
 
-
-
-
 module.exports = router;
