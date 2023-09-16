@@ -101,8 +101,8 @@ const loginUser = asyncHandler(async (req, res) => {
             await user.save();
             sendVerificationEmail(email, verificationToken);
             res.status(400).json({ message: "A new email has been sent to your email plz verify!!" })
-
         }
+
 
         if (user && await bcrypt.compare(password, user.password)) {
             const accessToken = jwt.sign({
@@ -112,7 +112,10 @@ const loginUser = asyncHandler(async (req, res) => {
                 role: user.role,
                 coins: user.coins,
                 isVerified: user.isVerified,
-                todos: user.todos
+                todos: user.todos,
+                notesUploaded: user.notesUploaded,
+                notesBought: user.notesBought,
+                lastPlayedLottery: user.lastPlayedLottery,
 
             }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
             res.status(200).json({ token: accessToken, message: "User logged in", user: user });

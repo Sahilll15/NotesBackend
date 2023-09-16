@@ -22,6 +22,12 @@ const userSchema = mongoose.Schema(
                 ref: "Notes",
             },
         ],
+        notesBought: [
+            {
+                type: mongoose.Types.ObjectId,
+                ref: "Notes",
+            }
+        ],
         todos: [
             {
                 type: mongoose.Types.ObjectId,

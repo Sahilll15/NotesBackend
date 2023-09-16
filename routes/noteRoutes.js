@@ -1,5 +1,5 @@
 const Router = require('express');
-const { getFormData, getAllNotes, addNotes, getSingleNote, deleteNote, getNotesAdmin, AcceptRejectNotes } = require('../controllers/noteCntrl');
+const { getFormData, getAllNotes, addNotes, getSingleNote, deleteNote, getNotesAdmin, AcceptRejectNotes, buyNote } = require('../controllers/noteCntrl');
 const validateToken = require('../middlewares/validateToken');
 const upload = require('../middlewares/upload');
 const router = Router();
@@ -11,7 +11,11 @@ router.route('/').get(validateToken, getAllNotes).post(validateToken, upload.sin
 // router.route('/:id').get(getSingleNote).delete(deleteNote);
 router.route('/getnotesAdmin').get(validateToken, getNotesAdmin);
 router.route('/acceptreject/:NoteId').put(validateToken, AcceptRejectNotes);
-router.route('/getFormData').get(getFormData);
-router.get('/getSingleNote/:noteId', getSingleNote)
+router.route('/getFormData').get(validateToken, getFormData);
+router.get('/getSingleNote/:noteId', validateToken, getSingleNote)
+router.delete('/deleteNote/:noteId', validateToken, deleteNote)
+router.post('/buyNote/:noteId', validateToken, buyNote)
 
 module.exports = router;
+
+

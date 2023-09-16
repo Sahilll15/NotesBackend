@@ -50,6 +50,10 @@ const noteSchema = mongoose.Schema({
     fileMimeType: {
         type: String,
         // required: [true, "Can't upload a note without a file"]
+    },
+    uploadedToS3: {
+        type: Boolean,
+        default: false
     }
 });
 
