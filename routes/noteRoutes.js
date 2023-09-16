@@ -16,6 +16,7 @@ router.get('/getSingleNote/:noteId', validateToken, getSingleNote)
 router.delete('/deleteNote/:noteId', validateToken, deleteNote)
 router.post('/buyNote/:noteId', validateToken, buyNote)
 
+
 module.exports = router;
 
 
