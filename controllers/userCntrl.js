@@ -87,16 +87,12 @@ const loginUser = asyncHandler(async (req, res) => {
 
         const { email, password } = req.body;
         if (!email || !password) {
-            res.status(400);
-            throw new Error("All fields are mandatory");
+            res.status(400).json({ message: "all fileds are required" })
         }
 
         const user = await User.findOne({ email });
-
-
         if (!user) {
-            res.status(404);
-            throw new Error(`User with this ${email} does not exist`);
+            res.status(404).json({ message: `user with ${email} does not exist` })
         }
         const verificationToken = generateverificationToken(email);
         if (!user.isVerified) {
@@ -104,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
             user.verificationToken = verificationToken;
             await user.save();
             sendVerificationEmail(email, verificationToken);
-            res.status(400).json({ mssg: "A new email has been sent to your email plz verify!!" })
+            res.status(400).json({ message: "A new email has been sent to your email plz verify!!" })
 
         }
 
@@ -119,10 +115,9 @@ const loginUser = asyncHandler(async (req, res) => {
                 todos: user.todos
 
             }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
-            res.status(200).json({ token: accessToken, msg: "User logged in", user: user });
+            res.status(200).json({ token: accessToken, message: "User logged in", user: user });
         } else {
-            res.status(400);
-            throw new Error("Password is not valid");
+            res.status(401).json({ message: "Invalid credentials" })
         }
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -202,6 +197,20 @@ const resetPassword = async (req, res) => {
 }
 
 
+const getUserById = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ mssg: "User not found" });
+        }
+
+        res.status(200).json({ mssg: "User found", user: user });
+
+    } catch (error) {
+        res.status(501).json({ mssg: error })
+    }
+}
 
 
 

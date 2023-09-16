@@ -35,9 +35,9 @@ const noteSchema = mongoose.Schema({
     }],
     desc: {
         type: String,
-        // minLength: 10,
-        // maxLength: 250,
-        // required: [true, "Desc must be provided"]
+        minLength: 10,
+        maxLength: 250,
+        required: [true, "Desc must be provided"]
     },
     author: {
         type: mongoose.Types.ObjectId,

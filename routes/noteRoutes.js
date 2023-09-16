@@ -12,5 +12,6 @@ router.route('/').get(validateToken, getAllNotes).post(validateToken, upload.sin
 router.route('/getnotesAdmin').get(validateToken, getNotesAdmin);
 router.route('/acceptreject/:NoteId').put(validateToken, AcceptRejectNotes);
 router.route('/getFormData').get(getFormData);
+router.get('/getSingleNote/:noteId', getSingleNote)
 
 module.exports = router;

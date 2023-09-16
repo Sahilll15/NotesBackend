@@ -31,6 +31,20 @@ const getAllNotes = asyncHandler(async (req, res) => {
     }
 });
 
+
+const getNotesById = async (req, res) => {
+    try {
+        const { noteID } = req.params;
+        const note = await Note.findById(noteID);
+        if (!note) {
+            res.status(401).json({ mssg: "note not found" })
+        }
+        res.status(200).json({ mssg: "note found", note: note })
+    } catch (error) {
+        res.status(501).json({ mssg: error })
+    }
+}
+
 const addNotes = asyncHandler(async (req, res) => {
     try {
         const { name, subject, module, desc } = req.body;
@@ -70,6 +84,8 @@ const addNotes = asyncHandler(async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
+
 
 const AcceptRejectNotes = async (req, res) => {
     const { NoteId } = req.params;
@@ -158,7 +174,7 @@ const deleteNote = asyncHandler(async (req, res) => {
 
 const getSingleNote = asyncHandler(async (req, res) => {
     try {
-        const { id: noteId } = req.params;
+        const { noteId } = req.params;
         const note = await Note.findById(noteId).populate("author");
         if (!note) {
             res.status(404).json({ message: `Unable to find note with id ${noteId}` });
@@ -171,14 +187,46 @@ const getSingleNote = asyncHandler(async (req, res) => {
     }
 });
 
+
+
+const fetchUserById = async (authorID) => {
+    try {
+        const user = await User.findById(authorID).select('_id username email coins role');
+        return user;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+
+
 const getNotesAdmin = async (req, res) => {
     try {
         const user = req.user;
 
         if (user.role === "superuser") {
             const notes = await Note.find();
-            console.log("Notes fetched successfully", notes);
-            res.status(200).json({ message: "Notes fetched successfully", data: notes });
+
+            //get all the authorid
+
+            const authorID = await notes.map(note => note.author)
+            console.log(authorID)
+
+            //get authors
+            const authors = await Promise.all(authorID.map(async (author) => {
+                const user = await fetchUserById(author)
+                return user;
+            }))
+
+            const notesWithAuthor = notes.map((note, index) => {
+                return {
+                    ...note._doc,
+                    author: authors[index]
+                }
+            })
+
+            res.status(200).json({ message: "Notes fetched successfully", data: notesWithAuthor });
         } else {
             console.log("Not authorized to access this route");
             res.status(403).json({ message: "You are not authorized to access this route" });
@@ -209,4 +257,4 @@ const getFormData = async (req, res) => {
 
 
 
-module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData };
+module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, };
