@@ -6,6 +6,8 @@ const getAllBrnch = asyncHandler(async (req, res) => {
     res.status(200).json(branch);
 });
 
+
+
 const addBranch = asyncHandler(async (req, res) => {
     const { name, year } = req.body;
 
