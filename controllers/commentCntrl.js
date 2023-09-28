@@ -1,52 +1,54 @@
-const Comment = require('../models/commentModel');
+const { Comment } = require('../models/commentModel');
 const { Note } = require('../models/noteModel');
 const { User } = require('../models/userModel');
 
 
 
-const creatCommnet = async (req, res) => {
-    const { NoteId } = req.params;
+const createComment = async (req, res) => {
+    const { noteId } = req.params;
     const { comment } = req.body;
     try {
-        const user = req.user._id;
+        if (!comment) {
+            res.status(401).json({ message: "comment is required" })
+        }
+        const user = req.user.id;
         const ExistingUSer = await User.findById(user);
         if (!ExistingUSer) {
-            res.status(401).json({ mssg: "user not found" })
+            res.status(401).json({ message: "user not found" })
         }
         const newCommnet = await Comment.create({
-            noteId: NoteId,
+            noteId: noteId,
             comment: comment,
-            user: {
-                id: user,
-                username: ExistingUSer.username
-            }
+            user: user
         })
 
         newCommnet.save();
-        res.status(200).json({ mssg: "commnet added succesfully", comment: comment })
+        res.status(200).json({ message: "comment added succesfully", comment: newCommnet })
     } catch (error) {
+        console.log(error)
         res.status(401).json(error)
     }
 }
 
 
-const getComments = async (req, res) => {
-    const { NoteId } = req.params;
+const getCommentsByNoteId = async (req, res) => {
+    const { noteId } = req.params;
     try {
-        const note = await Note.findById(NoteId);
+        console.log(noteId)
+        const note = await Note.findById(noteId);
         if (!note) {
-            res.status(401).json({ mssg: "post not found" })
+            res.status(401).json({ message: "post not found" })
         }
 
-        const comments = await Comment.find({ noteId: NoteId })
+        const comments = await Comment.find({ noteId: noteId }).populate('user')
         const qty = comments.length
 
-        res.status(200).json({ mssg: "comments succesfully fetched", comments: comments })
+        res.status(200).json({ message: "comments succesfully fetched", comments: comments, qty: qty })
     } catch (error) {
         res.status(401).json(error)
     }
 }
 
 module.exports = {
-    getComments, creatCommnet
+    getCommentsByNoteId, createComment
 }
