@@ -107,16 +107,9 @@ const loginUser = asyncHandler(async (req, res) => {
         if (user && await bcrypt.compare(password, user.password)) {
             const accessToken = jwt.sign({
                 id: user._id,
-                username: user.username,
                 email: user.email,
                 role: user.role,
-                coins: user.coins,
-                isVerified: user.isVerified,
-                todos: user.todos,
-                notesUploaded: user.notesUploaded,
-                notesBought: user.notesBought,
-                lastPlayedLottery: user.lastPlayedLottery,
-
+                isVerified: user.isVerified
             }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
             res.status(200).json({ token: accessToken, message: "User logged in", user: user });
         } else {

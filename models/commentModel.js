@@ -1,6 +1,6 @@
 
 const mongoose = require('mongoose')
-const Note = require('../models/noteModel')
+const { Note } = require('../models/noteModel')
 
 const CommentSchema = mongoose.Schema({
     noteId: {
@@ -8,20 +8,16 @@ const CommentSchema = mongoose.Schema({
         ref: "Note"
     },
     user: {
-        id: {
-            type: mongoose.Types.ObjectId,
-            ref: "User"
-        },
-        username: {
-            type: String,
-
-        }
+        type: mongoose.Types.ObjectId,
+        ref: "User"
     },
     comment: {
         type: String,
         required: true
     }
 
+}, {
+    timestamps: true
 })
 
 const Comment = mongoose.model("Comment", CommentSchema);

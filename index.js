@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const noteRoutes = require('./routes/noteRoutes');
 const todoRoutes = require('./routes/todoRoutes');
 const transferRoute = require('./routes/transfercoinsRoutes')
+const commentRoutes = require('./routes/commentRoutes')
 const cors = require('cors');
 require('dotenv').config();
 
@@ -49,6 +50,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/notes', noteRoutes);
 app.use('/api/v1/todos', todoRoutes);
 app.use('/api/v1/transfer', transferRoute);
+app.use('/api/v1/comments', commentRoutes);
 app.use(errorHandler);
 start();
 
