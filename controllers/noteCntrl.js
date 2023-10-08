@@ -53,14 +53,14 @@ const getAllNotes = asyncHandler(async (req, res) => {
         const notes = await Note.find({ acceptedStatus: true });
 
         const authorID = await notes.map(note => note.author)
-        console.log(authorID)
+
 
         //get authors
         const authors = await Promise.all(authorID.map(async (author) => {
             const user = await fetchUserById(author)
             return user;
         }))
-        console.log(authors)
+
 
         const notesWithAuthor = notes.map((note, index) => {
             return {

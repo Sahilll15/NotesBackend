@@ -33,6 +33,12 @@ const noteSchema = mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: "User"
     }],
+    comments: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: "Comment"
+        }
+    ],
     desc: {
         type: String,
         minLength: 10,

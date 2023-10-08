@@ -13,6 +13,10 @@ const createComment = async (req, res) => {
         }
         const user = req.user.id;
         const ExistingUSer = await User.findById(user);
+        const note = await Note.findById(noteId);
+        if (!note) {
+            res.status(401).json({ message: "note not found" })
+        }
         if (!ExistingUSer) {
             res.status(401).json({ message: "user not found" })
         }
@@ -22,6 +26,9 @@ const createComment = async (req, res) => {
             user: user
         })
 
+
+        note.comments.push(newCommnet._id);
+        await note.save();
         newCommnet.save();
         res.status(200).json({ message: "comment added succesfully", comment: newCommnet })
     } catch (error) {
@@ -40,7 +47,7 @@ const getCommentsByNoteId = async (req, res) => {
             res.status(401).json({ message: "post not found" })
         }
 
-        const comments = await Comment.find({ noteId: noteId }).populate('user')
+        const comments = await Comment.find({ noteId: noteId }).populate('user').sort({ createdAt: -1 })
         const qty = comments.length
 
         res.status(200).json({ message: "comments succesfully fetched", comments: comments, qty: qty })
