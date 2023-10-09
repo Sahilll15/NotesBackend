@@ -11,6 +11,10 @@ const subjectSchema = mongoose.Schema({
         ref: "Branch",
         required: [true, "Branch must be mentioned"]
     },
+    Image: {
+        type: String,
+
+    },
     sem: {
         type: Number,
         required: [true, "Sem must be mentioned"]
