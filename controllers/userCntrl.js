@@ -218,11 +218,9 @@ const getTotalLikes = async (userId) => {
     notes.forEach(note => {
         totalLikes += note.likes.length;
     })
-
-
-
     return totalLikes;
 }
+
 
 const getUserInfo = async (req, res) => {
     const { userId } = req.params;
@@ -255,7 +253,27 @@ const getUserInfo = async (req, res) => {
 }
 
 
+const getUsersLeaderBoard = async (req, res) => {
+    try {
+        const users = await User.find().sort({ coins: -1 });
+        if (!users) {
+            return res.status(401).json({ message: "No users found" });
+        }
 
+        const usersLeaderBoard = users.map((user, index) => {
+            return {
+                rank: index + 1,
+                username: user.username,
+                coins: user.coins
+            };
+        });
+
+        res.json(usersLeaderBoard);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
 
 module.exports = {
     userInfo,
@@ -264,6 +282,8 @@ module.exports = {
     verifyemail,
     sendResetPasswordEmail,
     resetPassword,
-    getUserInfo
+    getUserInfo,
+    getUserById,
+    getUsersLeaderBoard
 
 } 
