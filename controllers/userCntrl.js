@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { User } = require('../models/userModel')
 const { OTP } = require('../models/otpModel')
+const { Note } = require('../models/noteModel')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, generateverificationToken, generateOTP } = require('../utils/email')
@@ -208,6 +209,51 @@ const getUserById = async (req, res) => {
     }
 }
 
+//gettotalLikes by userId
+
+const getTotalLikes = async (userId) => {
+    const notes = await Note.find({ author: userId });
+    let totalLikes = 0;
+
+    notes.forEach(note => {
+        totalLikes += note.likes.length;
+    })
+
+
+
+    return totalLikes;
+}
+
+const getUserInfo = async (req, res) => {
+    const { userId } = req.params;
+    try {
+
+
+        const existingUser = await User.findById(userId);
+        if (!existingUser) {
+            res.status(401).json({ message: "user not found" })
+        }
+
+
+
+        const totalLikesOfUser = await getTotalLikes(userId);
+
+        const userDetails = {
+            coins: existingUser.coins,
+            notesUploaded: existingUser.notesUploaded?.length || 0,
+            notesBought: existingUser.notesBought?.length || 0,
+            totalLikes: totalLikesOfUser || 0
+
+        }
+
+        res.status(200).json({ userDetails: userDetails })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: error })
+    }
+}
+
 
 
 
@@ -218,5 +264,6 @@ module.exports = {
     verifyemail,
     sendResetPasswordEmail,
     resetPassword,
+    getUserInfo
 
 } 
