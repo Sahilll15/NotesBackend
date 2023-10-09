@@ -30,9 +30,16 @@ const buyNote = async (req, res) => {
         const note = await Note.findById(noteId);
         if (!note) {
             res.status(404).json({ message: `No note found with id ${noteId}` });
+            return;
         }
+        if (note.purchased.includes(user)) {
+            res.status(404).json({ message: `You have already bought this note` });
+            return;
+        }
+
         if (ExistingUser.coins < 10) {
             res.status(404).json({ message: `You don't have enough coins` });
+            return;
         }
         ExistingUser.coins -= 10;
         ExistingUser.notesBought.push(noteId);
@@ -48,29 +55,13 @@ const buyNote = async (req, res) => {
 }
 
 
+
+
 const getAllNotes = asyncHandler(async (req, res) => {
     try {
-        const notes = await Note.find({ acceptedStatus: true });
 
-        const authorID = await notes.map(note => note.author)
-
-
-        //get authors
-        const authors = await Promise.all(authorID.map(async (author) => {
-            const user = await fetchUserById(author)
-            return user;
-        }))
-
-
-        const notesWithAuthor = notes.map((note, index) => {
-            return {
-                ...note._doc,
-                author: authors[index]
-            }
-        })
-
-
-        res.status(200).json({ message: "Notes fetched successfully", data: notesWithAuthor });
+        const notes = await Note.find({ acceptedStatus: true }).populate('author', '-notesUploaded -notesBought').populate('subject')
+        res.status(200).json({ message: "Notes fetched successfully", data: notes });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -335,3 +326,4 @@ const searchNote = async (req, res) => {
 http://localhost:4000/api/v1/notes/search?name=react
 
 module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote };
+

@@ -18,8 +18,8 @@ const noteSchema = mongoose.Schema({
         default: false
     },
     subject: {
-        type: String,
-        required: [false, "Subject must be provided"]
+        type: mongoose.Types.ObjectId,
+        ref: "Subject",
     },
     module: {
         type: Number,
