@@ -320,6 +320,18 @@ const getFormData = async (req, res) => {
 }
 
 
+const searchNote = async (req, res) => {
+    try {
+        const search = req.query.name;
+        const notes = await Note.find({ name: { $regex: search } })
+        res.status(200).json({ message: "Notes fetched successfully", data: notes })
 
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
 
-module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote };
+http://localhost:4000/api/v1/notes/search?name=react
+
+module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote };
