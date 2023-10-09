@@ -162,9 +162,9 @@ const sendResetPasswordEmail = async (req, res) => {
 const resetPassword = async (req, res) => {
     const { email, otpCode, password } = req.body;
     try {
-        console.log(email, otpCode, password);
+
         let data = await OTP.findOne({ email, code: otpCode });
-        console.log(data);
+
 
 
         if (!data) {
