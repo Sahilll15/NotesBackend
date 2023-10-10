@@ -330,6 +330,25 @@ const editProfile = async (req, res) => {
 
 
 
+const getUserProfile = async (req, res) => {
+    try {
+        const { username } = req.params;
+        const user = await User.findOne({ username: username })
+            .select('-password -verificationToken ')
+            .exec();
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({ message: "User found", user: user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(error);
+    }
+};
+
+
 module.exports = {
     userInfo,
     registerUser,
@@ -340,6 +359,7 @@ module.exports = {
     getUserInfo,
     getUserById,
     getUsersLeaderBoard,
-    editProfile
+    editProfile,
+    getUserProfile
 
 } 

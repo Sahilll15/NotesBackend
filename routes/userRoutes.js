@@ -1,6 +1,6 @@
 const Router = require('express');
 const router = Router();
-const { userInfo, getUsersLeaderBoard, registerUser, getUserInfo, loginUser, verifyemail, sendResetPasswordEmail, resetPassword, editProfile } = require('../controllers/userCntrl');
+const { userInfo, getUserProfile, getUsersLeaderBoard, registerUser, getUserInfo, loginUser, verifyemail, sendResetPasswordEmail, resetPassword, editProfile } = require('../controllers/userCntrl');
 const validateToken = require('../middlewares/validateToken');
 const { ProfileUpload } = require('../middlewares/upload')
 
@@ -14,6 +14,7 @@ router.route('/register').post(registerUser)
 router.route('/getUserInfo/:userId').get(getUserInfo)
 router.route('/getUsersLeaderBoard').get(getUsersLeaderBoard)
 router.route('/editProfile').post(validateToken, ProfileUpload.single('profile'), editProfile)
+router.route('/getUserProfile/:username').get(getUserProfile)
 
 
 module.exports = router;
