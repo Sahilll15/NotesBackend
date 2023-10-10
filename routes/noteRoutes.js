@@ -1,7 +1,7 @@
 const Router = require('express');
 const { getFormData, getAllNotes, searchNote, addNotes, getSingleNote, deleteNote, getNotesAdmin, AcceptRejectNotes, buyNote } = require('../controllers/noteCntrl');
 const validateToken = require('../middlewares/validateToken');
-const upload = require('../middlewares/upload');
+const { upload } = require('../middlewares/upload');
 const router = Router();
 
 // Middleware to validate token for all routes under this router

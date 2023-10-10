@@ -1,7 +1,8 @@
 const Router = require('express');
 const router = Router();
-const { userInfo, getUsersLeaderBoard, registerUser, getUserInfo, loginUser, verifyemail, sendResetPasswordEmail, resetPassword } = require('../controllers/userCntrl');
+const { userInfo, getUsersLeaderBoard, registerUser, getUserInfo, loginUser, verifyemail, sendResetPasswordEmail, resetPassword, editProfile } = require('../controllers/userCntrl');
 const validateToken = require('../middlewares/validateToken');
+const { ProfileUpload } = require('../middlewares/upload')
 
 router.route('/register').post(registerUser)
 router.route('/login').post(loginUser);
@@ -12,6 +13,7 @@ router.route('/reset_password').post(resetPassword);
 router.route('/register').post(registerUser)
 router.route('/getUserInfo/:userId').get(getUserInfo)
 router.route('/getUsersLeaderBoard').get(getUsersLeaderBoard)
+router.route('/editProfile').post(validateToken, ProfileUpload.single('profile'), editProfile)
 
 
 module.exports = router;

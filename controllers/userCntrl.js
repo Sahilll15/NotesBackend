@@ -10,11 +10,26 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const isEmailEdu = require('../utils/isEduEmail')
 const { successFullVerification } = require('../utils/EmailTemplates')
+const AWS = require('aws-sdk')
+const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 const userInfo = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'Authentication successful', user: req.user });
 });
+
+
+
+
+
+// aws confioguration
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: 'us-east-2'
+})
+
+const s3 = new AWS.S3();
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -275,6 +290,46 @@ const getUsersLeaderBoard = async (req, res) => {
     }
 };
 
+
+const editProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { username, githubUsername } = req.body;
+        if (!username) {
+            return res.status(400).json({ message: "Username is required" })
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Upload the image to AWS if a file is provided
+        if (req.file) {
+            const fileKey = `${uuidv4()}-${req.file.originalname}`;
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: fileKey,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype
+            };
+            const data = await s3.upload(params).promise();
+            user.profile = data.Location;
+        }
+
+        user.username = username;
+        user.githubUsername = githubUsername;
+
+        await user.save();
+
+        res.status(200).json({ message: "Profile updated successfully", profile: user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+
+
 module.exports = {
     userInfo,
     registerUser,
@@ -284,6 +339,7 @@ module.exports = {
     resetPassword,
     getUserInfo,
     getUserById,
-    getUsersLeaderBoard
+    getUsersLeaderBoard,
+    editProfile
 
 } 
