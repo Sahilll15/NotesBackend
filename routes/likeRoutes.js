@@ -7,6 +7,4 @@ const router = Router();
 router.post('/likeUnlikeNote/:noteId', validateToken, likeUnlikeNote)
 
 
-
-
 module.exports = router;

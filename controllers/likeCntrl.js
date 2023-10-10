@@ -17,11 +17,12 @@ const likeUnlikeNote = async (req, res) => {
             })
 
             note.likes.push(newLike._id);
-
+            await note.save();
             res.status(200).json({ message: "liked", like: newLike })
         } else {
             await Like.findByIdAndDelete(like._id);
             note.likes.pull(like._id)
+            await note.save();
             res.status(200).json({ message: "unliked" })
 
         }
