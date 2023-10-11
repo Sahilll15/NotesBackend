@@ -15,7 +15,13 @@ const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 const userInfo = asyncHandler(async (req, res) => {
-    res.status(200).json({ message: 'Authentication successful', user: req.user });
+    const user = req.user.id;
+
+    const existingUser = await User.findById(user).select('-notesUploaded -notesBought -password ')
+    if (!existingUser) {
+        res.status(401).json({ message: "user not found" })
+    }
+    res.status(200).json({ message: 'Authentication successful', user: existingUser });
 });
 
 
@@ -35,21 +41,19 @@ const s3 = new AWS.S3();
 const registerUser = asyncHandler(async (req, res) => {
 
     try {
-        const { username, email, password, role } = req.body;
+        const { username, email, password, Department, role } = req.body;
         // if (role !== "superuser" && !isEmailEdu(email)) {
         //     res.status(400).json({ "mssg": "Only vect emails are allowed" })
         //     return;
         // }
 
-        if (!username || !email || !password) {
-            res.status(400);
-            throw new Error("All fields are mandatory baby");
+        if (!username || !email || !password || !Department) {
+            res.status(400).json({ message: "all fileds are required" })
         }
 
         const userAvailable = await User.findOne({ email });
         if (userAvailable) {
-            res.status(400);
-            throw new Error(`User with ${email} already exist`);
+            res.status(400).json({ message: "user already exist" })
         }
         const verificationToken = generateverificationToken(email);
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -57,6 +61,7 @@ const registerUser = asyncHandler(async (req, res) => {
             username,
             email,
             role,
+            Department,
             password: hashedPassword,
             verificationToken
         });
@@ -126,7 +131,7 @@ const loginUser = asyncHandler(async (req, res) => {
                 email: user.email,
                 role: user.role,
                 isVerified: user.isVerified
-            }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
+            }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
             res.status(200).json({ token: accessToken, message: "User logged in", user: user });
         } else {
             res.status(401).json({ message: "Invalid credentials" })
@@ -294,7 +299,7 @@ const getUsersLeaderBoard = async (req, res) => {
 const editProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { username, githubUsername } = req.body;
+        const { username, githubUsername, Bio, Department } = req.body;
         if (!username) {
             return res.status(400).json({ message: "Username is required" })
         }
@@ -318,6 +323,8 @@ const editProfile = async (req, res) => {
 
         user.username = username;
         user.githubUsername = githubUsername;
+        user.Bio = Bio;
+        user.Department = Department;
 
         await user.save();
 

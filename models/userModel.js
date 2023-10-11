@@ -19,6 +19,12 @@ const userSchema = mongoose.Schema(
         githubUsername: {
             type: String,
         },
+        Bio: {
+            type: String
+        },
+        Department: {
+            type: String
+        },
         profile: {
             type: String,
             default: "https://safesiren.vercel.app/static/media/login.665ff9176f5ac11ac2e6.png"
