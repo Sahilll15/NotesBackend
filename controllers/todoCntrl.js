@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const { User } = require('../models/userModel');
 
 const AddTodo = async (req, res) => {
-    const { title, description, deadline } = req.body;
+    const { title } = req.body;
     try {
-        if (!title || !description || !deadline) {
+        if (!title) {
             return res.status(400).json({ error: "Please fill all the fields" });
         }
 
@@ -15,13 +15,9 @@ const AddTodo = async (req, res) => {
         }
 
         const newTodo = new Todo({
-            user: {
-                id: user._id,
-                username: user.username,
-            },
+            user: req.user.id,
             title,
-            description,
-            deadline,
+
         });
 
         await newTodo.save();
@@ -45,13 +41,14 @@ const getTodo = async (req, res) => {
 };
 
 const getTodosByUserID = async (req, res) => {
-    const { userID } = req.params;
+
     try {
-        const user = await User.findById(userID);
+
+        const user = await User.findById(req.user.id)
         if (!user) {
             return res.status(400).json({ error: "User does not exist" });
         }
-        const todos = await Todo.find({ "user.id": userID });
+        const todos = await Todo.find({ user: user }).sort({ createdAt: -1 })
         res.status(200).json({ message: "Fetched the todos successfully", todos });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -60,26 +57,22 @@ const getTodosByUserID = async (req, res) => {
 
 const updateTodo = async (req, res) => {
     const { todoID } = req.params;
-    const { title, description, deadline, completed } = req.body;
+
     try {
         const todo = await Todo.findById(todoID);
         if (!todo) {
             return res.status(400).json({ error: "Todo does not exist" });
         }
 
-        // Check if at least one field is provided for update
-        if (!title && !description && !deadline && completed === undefined) {
-            return res.status(400).json({ error: "Please provide at least one field to update" });
-        }
 
         const updatedFields = {};
-        if (title) updatedFields.title = title;
-        if (description) updatedFields.description = description;
-        if (deadline) updatedFields.deadline = deadline;
-        if (completed !== undefined) updatedFields.completed = completed;
+        const todoCompleted = todo.completed;
+
+
+        updatedFields.completed = !todoCompleted;
 
         const newTodo = await Todo.findByIdAndUpdate(todoID, updatedFields, { new: true });
-        res.status(200).json({ message: "Todo updated successfully", newTodo });
+        res.status(200).json({ message: `todo ${newTodo.completed ? `completed` : `unSelected`} succesfully`, newTodo });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

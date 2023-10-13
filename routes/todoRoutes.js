@@ -24,7 +24,7 @@ router.route('/update/:todoID').put(validateToken, updateTodo);
 router.route('/getTodo').get(validateToken, getTodo);
 
 //to get all todos of a user
-router.route('/getTodo/:userID').get(validateToken, getTodosByUserID);
+router.route('/getTodoByUserId').get(validateToken, getTodosByUserID);
 
 
 module.exports = router;
