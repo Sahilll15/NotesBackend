@@ -294,17 +294,30 @@ const getFormData = async (req, res) => {
 
 const searchNote = async (req, res) => {
     try {
-        const search = req.query.name;
-        const notes = await Note.find({ name: { $regex: search } })
-        res.status(200).json({ message: "Notes fetched successfully", data: notes })
+        const { search } = req.query;
+        if (!search) {
+            return res.status(200).json({ message: "Please enter something to search", searchData: [] })
+        }
+        const notes = await Note.find().populate('subject')
 
+        const filterdData = notes.filter((note) => {
+            return (
+                note.name.toLowerCase().includes(search.toLowerCase()) ||
+                note.desc.toLowerCase().includes(search.toLowerCase()) ||
+                note.subject.name.toLowerCase().includes(search.toLowerCase())
+
+            )
+
+        })
+
+        res.status(200).json({ message: "Notes fetched successfully", searchData: filterdData });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
-http://localhost:4000/api/v1/notes/search?name=react
+http://localhost:4000/api/v1/notes/search?search=EEB
 
 module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote };
 

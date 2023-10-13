@@ -56,6 +56,15 @@ const getCommentsByNoteId = async (req, res) => {
     }
 }
 
+
+const getAllComments = async (req, res) => {
+    try {
+
+    } catch (error) {
+
+    }
+}
+
 module.exports = {
     getCommentsByNoteId, createComment
 }
