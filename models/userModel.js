@@ -32,13 +32,25 @@ const userSchema = mongoose.Schema(
         notesUploaded: [
             {
                 type: mongoose.Types.ObjectId,
-                ref: "Notes",
+                ref: "Note",
             },
         ],
         notesBought: [
             {
                 type: mongoose.Types.ObjectId,
-                ref: "Notes",
+                ref: "Note",
+            }
+        ],
+        notesLiked: [
+            {
+                type: mongoose.Types.ObjectId,
+                ref: "Note",
+            }
+        ],
+        notesBookMarked: [
+            {
+                type: mongoose.Types.ObjectId,
+                ref: "Note",
             }
         ],
         todos: [

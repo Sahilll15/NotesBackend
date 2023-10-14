@@ -61,6 +61,9 @@ const getAllNotes = asyncHandler(async (req, res) => {
     try {
 
         const notes = await Note.find({ acceptedStatus: true }).populate('author', '-notesUploaded -notesBought').populate('subject')
+
+
+
         res.status(200).json({ message: "Notes fetched successfully", data: notes });
     } catch (error) {
         console.error(error);
@@ -109,6 +112,9 @@ const addNotes = asyncHandler(async (req, res) => {
 
         const user = await User.findById(req.user.id);
         user.notesUploaded.push(newNote);
+        user.notesBought.push(newNote);
+        newNote.purchased.push(req.user.id);
+        await newNote.save()
         user.coins = (user.coins || 0) + 5;
         await user.save();
 
@@ -295,18 +301,19 @@ const getFormData = async (req, res) => {
 const searchNote = async (req, res) => {
     try {
         const { search } = req.query;
+        const notes = await Note.find({ acceptedStatus: true }).populate('subject')
         if (!search) {
-            return res.status(200).json({ message: "Please enter something to search", searchData: [] })
+            return res.status(200).json({ message: "Please enter something to search", searchData: notes })
         }
-        const notes = await Note.find().populate('subject')
 
         const filterdData = notes.filter((note) => {
+
             return (
                 note.name.toLowerCase().includes(search.toLowerCase()) ||
                 note.desc.toLowerCase().includes(search.toLowerCase()) ||
                 note.subject.name.toLowerCase().includes(search.toLowerCase())
+            );
 
-            )
 
         })
 
@@ -317,7 +324,89 @@ const searchNote = async (req, res) => {
     }
 }
 
-http://localhost:4000/api/v1/notes/search?search=EEB
 
-module.exports = { getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote };
+const filterPost = async (req, res) => {
+    try {
+        const { branch, module, subject } = req.query;
+        console.log(branch, module, subject)
+        const notes = await Note.find().populate('subject')
+
+        const filterdData = notes.filter((note) => {
+            return (
+                note.subject.name.toLowerCase().includes(subject.toLowerCase()) ||
+                note.subject.module.toLowerCase().includes(module.toLowerCase()) ||
+                note.subject.branch.toLowerCase().includes(branch.toLowerCase())
+
+            )
+
+        })
+
+        res.status(200).json({ message: "Notes fetched successfully", searchData: filterdData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+
+// http://localhost:4000/api/v1/notes/search?search=EEB -> this is how the route will look like
+
+const bookMarkNotes = async (req, res) => {
+    try {
+        const { noteId } = req.params;
+        const note = await Note.findById(noteId);
+        if (!note) {
+            res.status(404).json({ message: `No note found with id ${noteId}` });
+            return;
+        }
+        const user = req.user.id;
+        const ExistingUser = await User.findById(user).select('notesBookMarked')
+        if (!ExistingUser) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
+        if (ExistingUser.notesBookMarked.includes(noteId)) {
+            ExistingUser.notesBookMarked.pull(noteId);
+            await ExistingUser.save();
+            res.status(200).json({ message: "Note removed from bookmarked notes", user: ExistingUser });
+            return;
+        } else {
+            ExistingUser.notesBookMarked.push(noteId);
+            await ExistingUser.save();
+            res.status(200).json({ message: "Note added to bookmarked notes", user: ExistingUser });
+            return;
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+const getBookMarkedNotes = async (req, res) => {
+    try {
+        const user = req.user.id;
+        const existingUser = await User.findById(user).populate({
+            path: 'notesBookMarked',
+            populate: {
+                path: 'subject',
+            },
+        });
+
+        if (!existingUser) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json({
+            message: 'Bookmarked notes fetched successfully',
+            notes: existingUser.notesBookMarked,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+module.exports = { getBookMarkedNotes, filterPost, getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote, bookMarkNotes };
 

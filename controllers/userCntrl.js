@@ -39,42 +39,46 @@ const s3 = new AWS.S3();
 
 
 const registerUser = asyncHandler(async (req, res) => {
-
     try {
         const { username, email, password, Department, role } = req.body;
-        // if (role !== "superuser" && !isEmailEdu(email)) {
-        //     res.status(400).json({ "mssg": "Only vect emails are allowed" })
-        //     return;
-        // }
 
         if (!username || !email || !password || !Department) {
-            res.status(400).json({ message: "all fileds are required" })
+            res.status(400).json({ message: "all fields are required" });
+            return;
         }
 
-        const userAvailable = await User.findOne({ email });
+        // Convert the email to lowercase for case-insensitive comparison
+        const lowercaseEmail = email.toLowerCase();
+
+        const userAvailable = await User.findOne({ email: lowercaseEmail, username: username });
+
         if (userAvailable) {
-            res.status(400).json({ message: "user already exist" })
+            res.status(400).json({ message: "user already exists" });
+            return;
         }
-        const verificationToken = generateverificationToken(email);
+
+        const verificationToken = generateverificationToken(lowercaseEmail);
         const hashedPassword = await bcrypt.hash(password, 10);
+
         const user = await User.create({
             username,
-            email,
+            email: lowercaseEmail,
             role,
             Department,
             password: hashedPassword,
-            verificationToken
+            verificationToken,
         });
 
+        await sendVerificationEmail(lowercaseEmail, verificationToken);
 
-        await sendVerificationEmail(email, verificationToken);
-
-        res.json({ message: 'Registration successful. Please check your email for verification.', verificationToken: verificationToken, user: user });
-
+        res.json({
+            message: 'Registration successful. Please check your email for verification.',
+            verificationToken,
+            user,
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
         console.log(error);
-
     }
 });
 
