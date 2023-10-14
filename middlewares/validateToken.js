@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const validateToken = asyncHandler(async (req, res, next) => {
     try {
         const token = req.header("Authorization")?.replace("Bearer ", "");
-        console.log(token)
+
         if (!token) {
             return res.status(401).json({ msg: "No token, authorization denied" });
         }
@@ -16,7 +16,7 @@ const validateToken = asyncHandler(async (req, res, next) => {
                 return res.status(401).json({ msg: "Token has expired" });
             }
             req.user = decoded;
-            console.log(req.user)
+
             next();
         } catch (error) {
             res.status(401).json({ msg: "Token is not valid", error: error.message });
