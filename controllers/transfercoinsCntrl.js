@@ -106,9 +106,7 @@ const getTransferCoinsHistoryByUser = asyncHandler(async (req, res) => {
 
     }
 });
-
 const lottery = asyncHandler(async (req, res) => {
-
     try {
         const randomNumber = Math.floor(Math.random() * 30);
         const coinsWon = randomNumber;
@@ -117,12 +115,22 @@ const lottery = asyncHandler(async (req, res) => {
 
         const user = await User.findById(userID);
         if (user) {
-            user.coins += coinsWon;
-            await user.save();
-            if (coinsWon === 0) {
-                res.status(200).json({ message: `You won ${coinsWon} coins , sorry this was an fantasy from @karangandh`, user: user })
+            const lastPlayedLottery = new Date(user.lastPlayedLottery).getTime();
+            const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+
+            if (lastPlayedLottery > twentyFourHoursAgo) {
+                return res.status(400).json({ message: 'You have already played the lottery in the last 24 hours.' });
             }
-            return res.status(200).json({ message: `You won ${coinsWon} coins in the lottery!`, user: user });
+
+            user.coins += coinsWon;
+            user.lastPlayedLottery = Date.now();
+            await user.save();
+
+            if (coinsWon === 0) {
+                res.status(200).json({ message: `You won ${coinsWon} coins, sorry this was a fantasy from @karangandh`, user: user });
+            } else {
+                res.status(200).json({ message: `You won ${coinsWon} coins in the lottery!`, user: user });
+            }
         } else {
             return res.status(400).json({ message: 'User not found' });
         }
@@ -130,8 +138,7 @@ const lottery = asyncHandler(async (req, res) => {
         console.log(error);
         return res.status(500).json({ error: 'An error occurred during the lottery.' });
     }
-})
-
+});
 
 module.exports = {
     transferCoins,
