@@ -247,10 +247,10 @@ const getTotalLikes = async (userId) => {
 
 
 const getUserInfo = async (req, res) => {
-    const { userId } = req.params;
+
     try {
 
-
+        const userId = req.user.id;
         const existingUser = await User.findById(userId);
         if (!existingUser) {
             res.status(401).json({ message: "user not found" })

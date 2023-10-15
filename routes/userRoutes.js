@@ -11,7 +11,7 @@ router.route('/get_user_info').get(validateToken, userInfo);
 router.route('/reset_email').post(sendResetPasswordEmail);
 router.route('/reset_password').post(resetPassword);
 router.route('/register').post(registerUser)
-router.route('/getUserInfo/:userId').get(getUserInfo)
+router.route('/getUserInfo').get(validateToken, getUserInfo)
 router.route('/getUsersLeaderBoard').get(getUsersLeaderBoard)
 router.route('/editProfile').post(validateToken, ProfileUpload.single('profile'), editProfile)
 router.route('/getUserProfile/:username').get(getUserProfile)
