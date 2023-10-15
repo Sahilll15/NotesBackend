@@ -117,9 +117,10 @@ const lottery = asyncHandler(async (req, res) => {
         if (user) {
             const lastPlayedLottery = new Date(user.lastPlayedLottery).getTime();
             const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+            const hoursUntilNextLottery = -(Math.ceil((twentyFourHoursAgo - lastPlayedLottery) / 3600000));
 
             if (lastPlayedLottery > twentyFourHoursAgo) {
-                return res.status(400).json({ message: 'You have already played the lottery in the last 24 hours.' });
+                return res.status(400).json({ message: `You have already played the lottery in the last 24 hours. You can play it again in ${hoursUntilNextLottery} hours.` });
             }
 
             user.coins += coinsWon;
