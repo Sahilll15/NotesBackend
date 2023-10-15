@@ -38,6 +38,15 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 
+const initialCall = async (req, res) => {
+    try {
+        res.status(200).json({ message: "server started" })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
 const registerUser = asyncHandler(async (req, res) => {
     try {
         const { username, email, password, Department, role } = req.body;
@@ -387,6 +396,7 @@ module.exports = {
     getUsersLeaderBoard,
     editProfile,
     getUserProfile,
-    searchUser
+    searchUser,
+    initialCall
 
 } 
