@@ -360,6 +360,21 @@ const getUserProfile = async (req, res) => {
 };
 
 
+const searchUser = async (req, res) => {
+    try {
+        const { username } = req.query;
+
+        const user = await User.find({ username: { $regex: username, $options: 'i' } })
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+        res.status(200).json({ message: "User found", user: user })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(error);
+    }
+}
+
 module.exports = {
     userInfo,
     registerUser,
@@ -371,6 +386,7 @@ module.exports = {
     getUserById,
     getUsersLeaderBoard,
     editProfile,
-    getUserProfile
+    getUserProfile,
+    searchUser
 
 } 
