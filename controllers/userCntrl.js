@@ -289,10 +289,9 @@ const getUserInfo = async (req, res) => {
     }
 }
 
-
 const getUsersLeaderBoard = async (req, res) => {
     try {
-        const users = await User.find().sort({ coins: -1 });
+        const users = await User.find({ isVerified: true }).sort({ coins: -1 });
         if (!users) {
             return res.status(401).json({ message: "No users found" });
         }
@@ -311,8 +310,6 @@ const getUsersLeaderBoard = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
-
 const editProfile = async (req, res) => {
     try {
         const userId = req.user.id;
