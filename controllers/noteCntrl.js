@@ -301,7 +301,7 @@ const getFormData = async (req, res) => {
 const searchNote = async (req, res) => {
     try {
         const { search } = req.query;
-        const notes = await Note.find({ acceptedStatus: true }).populate('subject')
+        const notes = await Note.find({ acceptedStatus: true }).populate('subject author')
         if (!search) {
             return res.status(200).json({ message: "Please enter something to search", searchData: notes })
         }
@@ -408,5 +408,49 @@ const getBookMarkedNotes = async (req, res) => {
     }
 };
 
-module.exports = { getBookMarkedNotes, filterPost, getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote, bookMarkNotes };
+const getFilterdFormData = async (req, res) => {
+    try {
+        const { branch, module, subject } = req.query;
+        // const getModules = await ModuleName.find().select('name')
+        const getSubjects = await Subject.find().populate('branch', 'name').select('name branch')
+        const getBranches = await Branch.find().select('name')
+        res.status(200).json({ message: "Data fetched successfully", data: { branches: getBranches, subject: getSubjects } });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+
+}
+
+const filterNote = async (req, res) => {
+    try {
+        const { branch, subject, module, type } = req.query;
+        const notes = await Note.find().populate({ path: 'subject', populate: { path: 'branch', select: 'name' } });
+        if (branch && subject) {
+            const filterdData = notes.filter((note) => {
+                return (
+                    note?.subject?.name?.toLowerCase()?.includes(subject?.toLowerCase() ?? '')
+                )
+            })
+            res.status(200).json({ message: "Notes fetched successfully", searchData: filterdData, qty: filterdData.length });
+            return;
+        } else {
+            const filterdData = notes.filter((note) => {
+                return (
+                    note?.subject?.name?.toLowerCase()?.includes(subject?.toLowerCase() ?? '') ||
+                    note?.subject?.branch?.name?.toLowerCase()?.includes(branch?.toLowerCase() ?? '') ||
+                    note?.type?.toLowerCase()?.includes(type?.toLowerCase() ?? '')
+                )
+            })
+            res.status(200).json({ message: "Notes fetched successfully", searchData: filterdData, qty: filterdData.length });
+            return;
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+
+    }
+}
+module.exports = { filterNote, getBookMarkedNotes, filterPost, getAllNotes, addNotes, deleteNote, getSingleNote, getNotesAdmin, AcceptRejectNotes, getFormData, buyNote, searchNote, bookMarkNotes, getFilterdFormData };
 

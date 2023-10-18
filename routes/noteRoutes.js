@@ -1,5 +1,5 @@
 const Router = require('express');
-const { getBookMarkedNotes, bookMarkNotes, getFormData, getAllNotes, searchNote, addNotes, getSingleNote, deleteNote, getNotesAdmin, AcceptRejectNotes, buyNote } = require('../controllers/noteCntrl');
+const { filterNote, getFilterdFormData, getBookMarkedNotes, bookMarkNotes, getFormData, getAllNotes, searchNote, addNotes, getSingleNote, deleteNote, getNotesAdmin, AcceptRejectNotes, buyNote } = require('../controllers/noteCntrl');
 const validateToken = require('../middlewares/validateToken');
 const { upload } = require('../middlewares/upload');
 const router = Router();
@@ -18,6 +18,8 @@ router.post('/buyNote/:noteId', validateToken, buyNote)
 router.get('/search', validateToken, searchNote)
 router.post('/bookmark/:noteId', validateToken, bookMarkNotes)
 router.get('/getBookMarkedNotes', validateToken, getBookMarkedNotes)
+router.get('/getFilterdFormData', validateToken, getFilterdFormData)
+router.get('/filterNote', validateToken, filterNote)
 
 
 module.exports = router;
