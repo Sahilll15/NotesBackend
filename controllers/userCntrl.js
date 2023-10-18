@@ -56,7 +56,7 @@ const registerUser = asyncHandler(async (req, res) => {
             return;
         }
 
-        if (isEmailEdu(email)) {
+        if (!isEmailEdu(email)) {
             res.status(404).json({ message: "Only vcet id is accepted" })
         }
 
