@@ -115,7 +115,7 @@ const addNotes = asyncHandler(async (req, res) => {
         user.notesBought.push(newNote);
         newNote.purchased.push(req.user.id);
         await newNote.save()
-        user.coins = (user.coins || 0) + 5;
+
         await user.save();
 
         res.status(201).json({

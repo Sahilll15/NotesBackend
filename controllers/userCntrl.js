@@ -259,6 +259,18 @@ const getTotalLikes = async (userId) => {
 }
 
 
+const getUserRank = async (userId) => {
+    const users = await User.find({ isVerified: true }).sort({ coins: -1 });
+    let rank = 0;
+    users.forEach((user, index) => {
+        if (user.id === userId) {
+            rank = index + 1;
+        }
+    })
+    return rank;
+
+}
+
 const getUserInfo = async (req, res) => {
 
     try {
@@ -269,13 +281,17 @@ const getUserInfo = async (req, res) => {
             res.status(401).json({ message: "user not found" })
         }
 
+        const userRank = await getUserRank(userId);
+
 
 
         const totalLikesOfUser = await getTotalLikes(userId);
 
         const userDetails = {
+            rank: userRank,
             coins: existingUser.coins,
             notesUploaded: existingUser.notesUploaded?.length || 0,
+            notesBought: existingUser.notesBought?.length || 0,
             notesBought: existingUser.notesBought?.length || 0,
             totalLikes: totalLikesOfUser || 0
 
@@ -300,7 +316,8 @@ const getUsersLeaderBoard = async (req, res) => {
             return {
                 rank: index + 1,
                 username: user.username,
-                coins: user.coins
+                coins: user.coins,
+                id: user.id
             };
         });
 
@@ -384,6 +401,9 @@ const searchUser = async (req, res) => {
         res.status(500).json(error);
     }
 }
+
+
+
 
 module.exports = {
     userInfo,
