@@ -11,6 +11,10 @@ const transferCoins = asyncHandler(async (req, res) => {
         const { coins } = req.body;
         const senderUserID = req.user.id;
 
+        if (receiverID === senderUserID) {
+            return res.status(400).json({ message: "You can't transfer coins to yourself" });
+        }
+
         // Check if receiver ID is provided
         if (!receiverID) {
             return res.status(400).json({ message: "Receiver ID is required" });
@@ -19,13 +23,13 @@ const transferCoins = asyncHandler(async (req, res) => {
         // Check if sender user exists
         const senderUser = await User.findById(senderUserID);
         if (!senderUser) {
-            return res.status(400).json({ mssg: "Sender user does not exist" });
+            return res.status(400).json({ message: "Sender user does not exist" });
         }
 
         // Check if receiver user exists
         const receiverUser = await User.findById(receiverID);
         if (!receiverUser) {
-            return res.status(400).json({ mssg: "Receiver user does not exist" });
+            return res.status(400).json({ message: "Receiver user does not exist" });
         }
 
         // Check if coins value is valid
