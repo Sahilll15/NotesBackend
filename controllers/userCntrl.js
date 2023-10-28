@@ -128,7 +128,7 @@ const loginUser = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "all fileds are required" })
         }
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
             res.status(404).json({ message: `user with ${email} does not exist` })
         }
