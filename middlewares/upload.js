@@ -30,15 +30,26 @@ var upload = multer({
     }
 });
 
-//upload middlw are for the profile
-const Imagestorage = multer.memoryStorage(); // Use memory storage to avoid saving to disk
 
-const ProfileUpload = multer({
-    storage: Imagestorage,
+
+
+
+
+var profileStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/user_profiles');
+    },
+    filename: function (req, file, cb) {
+        let ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext);
+    }
+});
+
+var profileUpload = multer({
+    storage: profileStorage,
 })
-
 
 module.exports = {
     upload,
-    ProfileUpload
+    profileUpload
 };
