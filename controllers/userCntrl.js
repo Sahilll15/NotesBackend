@@ -167,10 +167,12 @@ const sendResetPasswordEmail = async (req, res) => {
 
 
     try {
-        let user = await User.findOne({ email: req.body.email });
+        const { email } = req.body;
+        console.log(email)
+        let user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({ mssg: 'Email does not exist' });
+            return res.status(404).json({ message: 'Email does not exist' });
         } else {
             //logic to delete exisitng otp
             const otpexist = OTP.findOne({ email: req.body.email })
@@ -189,10 +191,10 @@ const sendResetPasswordEmail = async (req, res) => {
             await otpData.save();
             await resetPasswordEmail(req.body.email, otpcode);
 
-            res.status(200).json({ mssg: 'OTP sent successfully', otp: otpData });
+            res.status(200).json({ message: 'OTP sent successfully' });
         }
     } catch (error) {
-        res.status(500).json({ mssg: 'Error' });
+        res.status(500).json({ message: 'Error' });
         console.log(error);
     }
 };
@@ -207,27 +209,27 @@ const resetPassword = async (req, res) => {
 
 
         if (!data) {
-            return res.status(404).json({ mssg: 'Invalid OTP' });
+            return res.status(404).json({ message: 'Invalid OTP' });
         } else {
             let currentTime = new Date();
             if (currentTime > data.expiration) {
-                res.status(401).json({ mssg: "Token Expired" });
+                res.status(401).json({ message: "Token Expired" });
             } else {
                 let user = await User.findOne({ email });
 
 
                 if (!user) {
-                    res.status(404).json({ mssg: "User does not exist" });
+                    res.status(404).json({ message: "User does not exist" });
                 } else {
                     const hashedPassword = await bcrypt.hash(password, 10);
                     user.password = hashedPassword;
                     await user.save();
-                    res.status(200).json({ mssg: "Password changed successfully" });
+                    res.status(200).json({ message: "Password changed successfully" });
                 }
             }
         }
     } catch (error) {
-        res.status(500).json({ mssg: 'Error' });
+        res.status(500).json({ message: 'Error' });
         console.log(error);
     }
 }
@@ -238,13 +240,13 @@ const getUserById = async (req, res) => {
     try {
         const user = await User.findById(userId);
         if (!user) {
-            res.status(404).json({ mssg: "User not found" });
+            res.status(404).json({ message: "User not found" });
         }
 
-        res.status(200).json({ mssg: "User found", user: user });
+        res.status(200).json({ message: "User found", user: user });
 
     } catch (error) {
-        res.status(501).json({ mssg: error })
+        res.status(501).json({ message: error })
     }
 }
 
