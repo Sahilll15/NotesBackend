@@ -5,3 +5,15 @@ exports.constants = {
     NOT_FOUND: 404,
     SERVER: 500
 }
+
+const bcrypt = require('bcryptjs');
+let pwd = '123';
+async function hasFn() {
+    return await bcrypt.hash(pwd, 10);
+}
+
+hasFn().then((res) => {
+    console.log(res);
+}).catch((err) => {
+    console.log(err);
+})

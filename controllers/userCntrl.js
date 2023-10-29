@@ -13,6 +13,8 @@ const { successFullVerification } = require('../utils/EmailTemplates')
 const AWS = require('aws-sdk')
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
+const fs = require('fs');
+
 
 const userInfo = asyncHandler(async (req, res) => {
     const user = req.user.id;
@@ -331,9 +333,9 @@ const editProfile = async (req, res) => {
     try {
         const userId = req.user.id;
         const { username, githubUsername, Bio, Department } = req.body;
-        if (!username) {
-            return res.status(400).json({ message: "Username is required" })
-        }
+        // if (!username) {
+        //     return res.status(400).json({ message: "Username is required" })
+        // }
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -341,21 +343,26 @@ const editProfile = async (req, res) => {
 
         // Upload the image to AWS if a file is provided
         if (req.file) {
+            console.log("File present")
+            
             const fileKey = `${uuidv4()}-${req.file.originalname}`;
             const params = {
                 Bucket: process.env.AWS_BUCKET_NAME,
                 Key: fileKey,
-                Body: req.file.buffer,
+                Body: fs.createReadStream(req.file.path),
                 ContentType: req.file.mimetype
             };
             const data = await s3.upload(params).promise();
             user.profile = data.Location;
+            console.log("File uploaded successfully")
+        }else{
+            console.log("No file provided")
         }
 
-        user.username = username;
-        user.githubUsername = githubUsername;
-        user.Bio = Bio;
-        user.Department = Department;
+        user.username = username?username:user.username;
+        user.githubUsername = githubUsername?githubUsername:user.githubUsername;
+        user.Bio = Bio?Bio:user.Bio;
+        user.Department = Department?Department:user.Department;
 
         await user.save();
 
