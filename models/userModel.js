@@ -68,6 +68,11 @@ const userSchema = mongoose.Schema(
             enum: ["user", "superuser"],
             default: "user",
         },
+        skills: [
+            {
+                type: String
+            }
+        ],
         is_active: {
             type: Boolean,
             default: "true",
