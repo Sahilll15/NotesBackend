@@ -12,6 +12,7 @@ const transferRoute = require('./routes/transfercoinsRoutes')
 const commentRoutes = require('./routes/commentRoutes')
 const impDateRoutes = require('./routes/impDateRoutes')
 const likeRoutes = require('./routes/likeRoutes')
+const skillsRoutes = require('./routes/skillsRoutes')
 const cors = require('cors');
 require('dotenv').config();
 
@@ -55,6 +56,7 @@ app.use('/api/v1/transfer', transferRoute);
 app.use('/api/v1/comments', commentRoutes);
 app.use('/api/v1/likes', likeRoutes);
 app.use('/api/v1/impDates', impDateRoutes);
+app.use('/api/v1/skills', skillsRoutes);
 app.use(errorHandler);
 start();
 
